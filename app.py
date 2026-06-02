@@ -7,7 +7,8 @@ import os
 from pdf_generator import generate_sacs_pdf, generate_tcc_pdf
 
 app = Flask(__name__)
-DB_PATH = os.path.join(os.path.dirname(__file__), 'database', 'portal.db')
+DB_PATH = os.environ.get('DB_PATH', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'database', 'portal.db'))
+os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
 
 # ─── DATABASE ────────────────────────────────────────────────────────────────
 
@@ -339,3 +340,5 @@ def api_calc():
 if __name__ == '__main__':
     init_db()
     app.run(debug=True, port=5000)
+else:
+    init_db()
