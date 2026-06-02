@@ -6,7 +6,10 @@ import io
 import os
 from pdf_generator import generate_sacs_pdf, generate_tcc_pdf
 
-app = Flask(__name__)
+import os
+_base = os.path.dirname(os.path.abspath(__file__))
+_tmpl = os.path.join(_base, 'templates') if os.path.isdir(os.path.join(_base, 'templates')) else _base
+app = Flask(__name__, template_folder=_tmpl)
 DB_PATH = os.environ.get('DB_PATH', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'database', 'portal.db'))
 os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
 
