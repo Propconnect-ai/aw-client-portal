@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block nav_dash %}active{% endblock %}
+
+{% block content %}
+<div class="page">
+    <div class="page-header">
+        <div>
+            <h1>Client Directory</h1>
+            <p>Quarterly financial report management — Windbrook Solutions</p>
+        </div>
+        <a href="/client/new" class="btn btn-teal">+ Add Client</a>
+    </div>
+
+    {% if clients %}
+    <div class="card" style="padding: 0; overflow: hidden;">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Client</th>
+                    <th>Members</th>
+                    <th>Last Report</th>
+                    <th style="text-align:right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for client in clients %}
+                <tr>
+                    <td>
+                        <div style="font-weight:600; color:var(--navy);">{{ client.name }}</div>
+                        {% if client.c1_name %}
+                        <div style="font-size:12px; color:var(--gray-400);">{{ client.c1_name }}{% if client.c2_name %} & {{ client.c2_name }}{% endif %}</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if client.c2_name %}
+                            <span class="badge badge-blue">Joint</span>
+                        {% else %}
+                            <span class="badge badge-gray">Individual</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if client.last_report_date %}
+                            <span class="badge badge-green">{{ client.last_report_date }}</span>
+                        {% else %}
+                            <span class="badge badge-gold">No reports yet</span>
+                        {% endif %}
+                    </td>
+                    <td style="text-align:right;">
+                        <div class="btn-group" style="justify-content:flex-end;">
+                            <a href="/client/{{ client.id }}" class="btn btn-ghost btn-sm">Profile</a>
+                            <a href="/client/{{ client.id }}/entry" class="btn btn-primary btn-sm">Generate Report</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="card" style="text-align:center; padding:60px; color:var(--gray-400);">
+        <div style="font-size:32px; margin-bottom:12px;">📋</div>
+        <div style="font-weight:600; font-size:15px; color:var(--navy);">No clients yet</div>
+        <div style="margin-top:6px; margin-bottom:20px;">Add your first client to get started.</div>
+        <a href="/client/new" class="btn btn-teal">+ Add Client</a>
+    </div>
+    {% endif %}
+
+    <div class="alert alert-blue" style="margin-top:24px;">
+        <strong>How it works:</strong> Add a client once with their profile and accounts → Click "Generate Report" before each quarterly meeting → Enter current balances → Download SACS and TCC PDFs.
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Add New Client{% endblock %}
+
+{% block content %}
+<div class="page-sm">
+    <div class="breadcrumb"><a href="/">Dashboard</a> / New Client</div>
+    <div class="page-header">
+        <div>
+            <h1>Add New Client</h1>
+            <p>Enter static profile info once. You'll add account details on the next screen.</p>
+        </div>
+    </div>
+
+    <form method="POST" action="/client/new">
+        <div class="card">
+            <div class="card-title"><span class="stripe" style="background:var(--navy)"></span>Client Family Name</div>
+            <div class="form-group">
+                <label class="form-label">Family / Display Name</label>
+                <input class="form-input" type="text" name="name" placeholder="e.g. Andrew & Rebecca Smith" required>
+                <div class="form-hint">This name appears on all reports.</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="stripe" style="background:var(--green)"></span>Client 1 (Primary)</div>
+            <div class="form-grid-3">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input class="form-input" type="text" name="c1_name" placeholder="First & Last" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Date of Birth</label>
+                    <input class="form-input" type="date" name="c1_dob" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Last 4 SSN</label>
+                    <input class="form-input" type="text" name="c1_ssn" placeholder="1234" maxlength="4" pattern="\d{4}" required>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><span class="stripe" style="background:var(--blue)"></span>Client 2 (Spouse — Optional)</div>
+            <div class="form-grid-3">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input class="form-input" type="text" name="c2_name" placeholder="Spouse Full Name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Date of Birth</label>
+                    <input class="form-input" type="date" name="c2_dob">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Last 4 SSN</label>
+                    <input class="form-input" type="text" name="c2_ssn" placeholder="5678" maxlength="4" pattern="\d{0,4}">
+                </div>
+            </div>
+        </div>
+
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+            <a href="/" class="btn btn-ghost">Cancel</a>
+            <button type="submit" class="btn btn-teal">Create Client →</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

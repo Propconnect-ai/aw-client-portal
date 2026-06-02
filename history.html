@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}History — {{ client.name }}{% endblock %}
+
+{% block content %}
+<div class="page-sm">
+    <div class="breadcrumb"><a href="/">Dashboard</a> / <a href="/client/{{ client.id }}">{{ client.name }}</a> / History</div>
+    <div class="page-header">
+        <div>
+            <h1>Report History</h1>
+            <p>{{ client.name }}</p>
+        </div>
+        <a href="/client/{{ client.id }}/entry" class="btn btn-teal">Generate New →</a>
+    </div>
+
+    {% if history %}
+    <div class="card" style="padding:0; overflow:hidden;">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Report Date</th>
+                    <th style="text-align:right;">PDFs</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for h in history %}
+                <tr>
+                    <td><span class="badge badge-blue">Q</span>  {{ h.report_date }}</td>
+                    <td style="text-align:right;">
+                        <div class="btn-group" style="justify-content:flex-end;">
+                            <a href="/client/{{ client.id }}/pdf/sacs" class="btn btn-ghost btn-sm" target="_blank">SACS PDF</a>
+                            <a href="/client/{{ client.id }}/pdf/tcc"  class="btn btn-ghost btn-sm" target="_blank">TCC PDF</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="card" style="text-align:center; padding:48px; color:var(--gray-400);">
+        No reports generated yet.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+{% block title %}{{ client.name }}{% endblock %}
+
+{% block content %}
+<div class="page">
+    <div class="breadcrumb"><a href="/">Dashboard</a> / {{ client.name }}</div>
+    <div class="page-header">
+        <div>
+            <h1>{{ client.name }}</h1>
+            <p>Client profile & account structure — edit accounts, then generate quarterly report</p>
+        </div>
+        <div class="btn-group">
+            <a href="/client/{{ client.id }}/history" class="btn btn-ghost">History</a>
+            <a href="/client/{{ client.id }}/entry" class="btn btn-teal">Generate Report →</a>
+        </div>
+    </div>
+
+    <!-- Client bubbles -->
+    <div style="display:grid; grid-template-columns: 1fr{% if client.c2_name %} 1fr{% endif %}; gap:14px; margin-bottom:20px;">
+        <div class="stat-tile green">
+            <div class="stat-label">Client 1</div>
+            <div style="font-size:16px; font-weight:700; color:var(--navy); margin-top:4px;">{{ client.c1_name }}</div>
+            <div class="stat-sub">{% if client.c1_dob %}DOB: {{ client.c1_dob }}  |  Age: {{ age1 }}{% endif %}  |  SSN: ****{{ client.c1_ssn }}</div>
+        </div>
+        {% if client.c2_name %}
+        <div class="stat-tile blue">
+            <div class="stat-label">Client 2 (Spouse)</div>
+            <div style="font-size:16px; font-weight:700; color:var(--navy); margin-top:4px;">{{ client.c2_name }}</div>
+            <div class="stat-sub">{% if client.c2_dob %}DOB: {{ client.c2_dob }}  |  Age: {{ age2 }}{% endif %}  |  SSN: ****{{ client.c2_ssn }}</div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Totals snapshot -->
+    <div class="stats-row">
+        <div class="stat-tile green">
+            <div class="stat-label">C1 Retirement</div>
+            <div class="stat-value">${{ "{:,.0f}".format(totals.c1_retirement) }}</div>
+        </div>
+        <div class="stat-tile blue">
+            <div class="stat-label">C2 Retirement</div>
+            <div class="stat-value">${{ "{:,.0f}".format(totals.c2_retirement) }}</div>
+        </div>
+        <div class="stat-tile navy">
+            <div class="stat-label">Non-Retirement</div>
+            <div class="stat-value">${{ "{:,.0f}".format(totals.non_retirement) }}</div>
+        </div>
+        <div class="stat-tile gold">
+            <div class="stat-label">Trust / Real Estate</div>
+            <div class="stat-value">${{ "{:,.0f}".format(totals.trust) }}</div>
+        </div>
+        <div class="stat-tile navy">
+            <div class="stat-label">Net Worth</div>
+            <div class="stat-value">${{ "{:,.0f}".format(totals.net_worth) }}</div>
+        </div>
+        <div class="stat-tile red">
+            <div class="stat-label">Liabilities</div>
+            <div class="stat-value">${{ "{:,.0f}".format(totals.liabilities) }}</div>
+        </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+        <!-- Accounts panel -->
+        <div>
+            <div class="card">
+                <div class="card-title"><span class="stripe" style="background:var(--green)"></span>Client 1 Retirement</div>
+                {% for acc in ret_c1 %}
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--gray-100);">
+                    <div>
+                        <div style="font-weight:600; font-size:13px;">{{ acc.account_name }} {% if acc.last_four %}<span style="color:var(--gray-400);">****{{ acc.last_four }}</span>{% endif %}</div>
+                        <div style="font-size:12px; color:var(--teal); font-family:'DM Mono',monospace;">${{ "{:,.2f}".format(acc.balance) }}</div>
+                    </div>
+                    <form method="POST" action="/client/{{ client.id }}/delete-account/{{ acc.id }}" onsubmit="return confirm('Remove this account?')">
+                        <button class="btn btn-ghost btn-sm" style="color:var(--red);">✕</button>
+                    </form>
+                </div>
+                {% else %}
+                <div style="color:var(--gray-400); font-size:13px;">No accounts added yet.</div>
+                {% endfor %}
+            </div>
+
+            <div class="card">
+                <div class="card-title"><span class="stripe" style="background:var(--blue)"></span>Client 2 Retirement</div>
+                {% for acc in ret_c2 %}
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--gray-100);">
+                    <div>
+                        <div style="font-weight:600; font-size:13px;">{{ acc.account_name }} {% if acc.last_four %}<span style="color:var(--gray-400);">****{{ acc.last_four }}</span>{% endif %}</div>
+                        <div style="font-size:12px; color:var(--teal); font-family:'DM Mono',monospace;">${{ "{:,.2f}".format(acc.balance) }}</div>
+                    </div>
+                    <form method="POST" action="/client/{{ client.id }}/delete-account/{{ acc.id }}" onsubmit="return confirm('Remove this account?')">
+                        <button class="btn btn-ghost btn-sm" style="color:var(--red);">✕</button>
+                    </form>
+                </div>
+                {% else %}
+                <div style="color:var(--gray-400); font-size:13px;">No accounts added yet.</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div>
+            <div class="card">
+                <div class="card-title"><span class="stripe" style="background:var(--navy)"></span>Non-Retirement Accounts</div>
+                {% for acc in non_ret %}
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--gray-100);">
+                    <div>
+                        <div style="font-weight:600; font-size:13px;">{{ acc.account_name }} {% if acc.last_four %}<span style="color:var(--gray-400);">****{{ acc.last_four }}</span>{% endif %}</div>
+                        <div style="font-size:12px; color:var(--teal); font-family:'DM Mono',monospace;">${{ "{:,.2f}".format(acc.balance) }}</div>
+                    </div>
+                    <form method="POST" action="/client/{{ client.id }}/delete-account/{{ acc.id }}" onsubmit="return confirm('Remove this account?')">
+                        <button class="btn btn-ghost btn-sm" style="color:var(--red);">✕</button>
+                    </form>
+                </div>
+                {% else %}
+                <div style="color:var(--gray-400); font-size:13px;">No accounts added yet.</div>
+                {% endfor %}
+            </div>
+
+            <div class="card">
+                <div class="card-title"><span class="stripe" style="background:var(--gold)"></span>Trust / Real Estate</div>
+                {% for acc in trust %}
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--gray-100);">
+                    <div>
+                        <div style="font-weight:600; font-size:13px;">{{ acc.account_name }}</div>
+                        {% if acc.property_address %}<div style="font-size:11px; color:var(--gray-400);">{{ acc.property_address }}</div>{% endif %}
+                        <div style="font-size:12px; color:var(--teal); font-family:'DM Mono',monospace;">${{ "{:,.2f}".format(acc.balance) }}</div>
+                    </div>
+                    <form method="POST" action="/client/{{ client.id }}/delete-account/{{ acc.id }}" onsubmit="return confirm('Remove this account?')">
+                        <button class="btn btn-ghost btn-sm" style="color:var(--red);">✕</button>
+                    </form>
+                </div>
+                {% else %}
+                <div style="color:var(--gray-400); font-size:13px;">No trust accounts added yet.</div>
+                {% endfor %}
+            </div>
+
+            <div class="card">
+                <div class="card-title"><span class="stripe" style="background:var(--red)"></span>Liabilities</div>
+                {% for acc in liabilities %}
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--gray-100);">
+                    <div>
+                        <div style="font-weight:600; font-size:13px;">{{ acc.account_name }}</div>
+                        {% if acc.interest_rate %}<div style="font-size:11px; color:var(--gray-400);">Rate: {{ acc.interest_rate }}</div>{% endif %}
+                        <div style="font-size:12px; color:var(--red); font-family:'DM Mono',monospace;">${{ "{:,.2f}".format(acc.balance) }}</div>
+                    </div>
+                    <form method="POST" action="/client/{{ client.id }}/delete-account/{{ acc.id }}" onsubmit="return confirm('Remove this account?')">
+                        <button class="btn btn-ghost btn-sm" style="color:var(--red);">✕</button>
+                    </form>
+                </div>
+                {% else %}
+                <div style="color:var(--gray-400); font-size:13px;">No liabilities added yet.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Add account form -->
+    <div class="card">
+        <div class="card-title"><span class="stripe" style="background:var(--teal)"></span>Add Account</div>
+        <form method="POST" action="/client/{{ client.id }}/add-account">
+            <div class="form-grid" style="grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr;">
+                <div class="form-group" style="margin:0">
+                    <label class="form-label">Account Name</label>
+                    <input class="form-input" type="text" name="account_name" placeholder="e.g. Schwab Roth IRA" required>
+                </div>
+                <div class="form-group" style="margin:0">
+                    <label class="form-label">Type</label>
+                    <select class="form-input" name="account_type" required>
+                        <option value="retirement">Retirement</option>
+                        <option value="non_retirement">Non-Retirement</option>
+                        <option value="trust">Trust / Real Estate</option>
+                        <option value="liability">Liability</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin:0">
+                    <label class="form-label">Owner</label>
+                    <select class="form-input" name="owner">
+                        <option value="client1">Client 1</option>
+                        <option value="client2">Client 2</option>
+                        <option value="joint">Joint</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin:0">
+                    <label class="form-label">Last 4 Acct#</label>
+                    <input class="form-input" type="text" name="last_four" placeholder="1234" maxlength="4">
+                </div>
+                <div class="form-group" style="margin:0; display:flex; align-items:flex-end;">
+                    <button type="submit" class="btn btn-teal" style="width:100%;">Add</button>
+                </div>
+            </div>
+            <div class="form-grid" style="margin-top:10px; grid-template-columns:1fr 1fr;">
+                <div class="form-group" style="margin:0">
+                    <label class="form-label">Interest Rate (liabilities only)</label>
+                    <input class="form-input" type="text" name="interest_rate" placeholder="e.g. 4.5%">
+                </div>
+                <div class="form-group" style="margin:0">
+                    <label class="form-label">Property Address (trust only)</label>
+                    <input class="form-input" type="text" name="property_address" placeholder="123 Main St, Atlanta, GA">
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

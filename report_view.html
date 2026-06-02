@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+{% block title %}Report — {{ client.name }}{% endblock %}
+
+{% block content %}
+<div class="page">
+    <div class="breadcrumb"><a href="/">Dashboard</a> / <a href="/client/{{ client.id }}">{{ client.name }}</a> / Report</div>
+
+    <div class="page-header">
+        <div>
+            <h1>Quarterly Reports Ready</h1>
+            <p>{{ client.name }}  —  {{ today }}</p>
+        </div>
+        <div class="btn-group">
+            <a href="/client/{{ client.id }}/entry" class="btn btn-ghost">← Back to Entry</a>
+            <a href="/client/{{ client.id }}/pdf/sacs" class="btn btn-teal" target="_blank">⬇ Download SACS PDF</a>
+            <a href="/client/{{ client.id }}/pdf/tcc"  class="btn btn-primary" target="_blank">⬇ Download TCC PDF</a>
+        </div>
+    </div>
+
+    <!-- ── SACS PREVIEW ───────────────────────────────────── -->
+    <div class="card" style="border-top:4px solid var(--green);">
+        <div class="card-title"><span class="stripe" style="background:var(--green)"></span>SACS — Simple Automated Cash Flow System</div>
+
+        <!-- Bubble diagram (CSS preview) -->
+        <div style="display:flex; align-items:center; justify-content:center; gap:0; margin:24px 0; position:relative;">
+
+            <!-- Inflow bubble -->
+            <div style="width:150px; height:150px; border-radius:50%; background:var(--green); display:flex; flex-direction:column; align-items:center; justify-content:center; color:white; text-align:center; box-shadow:0 6px 20px rgba(39,103,73,0.35); flex-shrink:0;">
+                <div style="font-size:10px; font-weight:700; letter-spacing:.06em; opacity:.8;">INFLOW</div>
+                <div style="font-size:16px; font-weight:800; margin-top:4px; font-family:'DM Mono',monospace;">${{ "{:,.0f}".format(client.monthly_inflow) }}</div>
+                <div style="font-size:11px; opacity:.7;">/mo</div>
+                <div style="font-size:9px; opacity:.6; margin-top:4px;">Monthly Net Salary</div>
+            </div>
+
+            <!-- Arrow + X -->
+            <div style="display:flex; flex-direction:column; align-items:center; gap:4px; padding:0 8px;">
+                <div style="color:var(--red); font-size:18px; font-weight:900;">✕</div>
+                <div style="height:2px; width:60px; background:var(--green);"></div>
+                <div style="font-size:9px; color:var(--gray-400); text-align:center;">expenses<br>out</div>
+            </div>
+
+            <!-- Outflow bubble -->
+            <div style="width:150px; height:150px; border-radius:50%; background:var(--red); display:flex; flex-direction:column; align-items:center; justify-content:center; color:white; text-align:center; box-shadow:0 6px 20px rgba(155,35,53,0.35); flex-shrink:0;">
+                <div style="font-size:10px; font-weight:700; letter-spacing:.06em; opacity:.8;">OUTFLOW</div>
+                <div style="font-size:16px; font-weight:800; margin-top:4px; font-family:'DM Mono',monospace;">${{ "{:,.0f}".format(client.monthly_outflow) }}</div>
+                <div style="font-size:11px; opacity:.7;">/mo</div>
+                <div style="font-size:9px; opacity:.6; margin-top:4px;">Monthly Budget</div>
+            </div>
+
+            <!-- Arrow -->
+            <div style="display:flex; flex-direction:column; align-items:center; gap:4px; padding:0 8px;">
+                <div style="height:2px; width:60px; background:var(--blue);"></div>
+                <div style="font-size:9px; color:var(--gray-400); text-align:center;">surplus<br>swept</div>
+            </div>
+
+            <!-- Reserve bubble -->
+            <div style="width:150px; height:150px; border-radius:50%; background:var(--blue); display:flex; flex-direction:column; align-items:center; justify-content:center; color:white; text-align:center; box-shadow:0 6px 20px rgba(26,78,125,0.35); flex-shrink:0;">
+                <div style="font-size:10px; font-weight:700; letter-spacing:.06em; opacity:.8;">PRIVATE</div>
+                <div style="font-size:10px; font-weight:700; letter-spacing:.06em; opacity:.8;">RESERVE</div>
+                <div style="font-size:16px; font-weight:800; margin-top:4px; font-family:'DM Mono',monospace;">${{ "{:,.0f}".format(totals.excess) }}</div>
+                <div style="font-size:11px; opacity:.7;">/mo surplus</div>
+            </div>
+        </div>
+
+        <!-- SACS stats row -->
+        <div class="stats-row">
+            <div class="stat-tile green">
+                <div class="stat-label">Monthly Inflow</div>
+                <div class="stat-value">${{ "{:,.2f}".format(client.monthly_inflow) }}</div>
+            </div>
+            <div class="stat-tile red">
+                <div class="stat-label">Monthly Outflow</div>
+                <div class="stat-value">${{ "{:,.2f}".format(client.monthly_outflow) }}</div>
+            </div>
+            <div class="stat-tile blue">
+                <div class="stat-label">Monthly Surplus</div>
+                <div class="stat-value">${{ "{:,.2f}".format(totals.excess) }}</div>
+            </div>
+            <div class="stat-tile blue">
+                <div class="stat-label">Private Reserve Balance</div>
+                <div class="stat-value">${{ "{:,.2f}".format(client.private_reserve_balance) }}</div>
+            </div>
+            <div class="stat-tile navy">
+                <div class="stat-label">Reserve Target</div>
+                <div class="stat-value">${{ "{:,.2f}".format(totals.reserve_target) }}</div>
+                <div class="stat-sub">6mo × outflow + deductibles</div>
+            </div>
+        </div>
+        <div style="text-align:center; margin-top:8px;">
+            <a href="/client/{{ client.id }}/pdf/sacs" class="btn btn-teal" target="_blank">⬇ Download SACS PDF</a>
+        </div>
+    </div>
+
+    <!-- ── TCC PREVIEW ────────────────────────────────────── -->
+    <div class="card" style="border-top:4px solid var(--navy);">
+        <div class="card-title"><span class="stripe" style="background:var(--navy)"></span>TCC — Total Client Chart (Net Worth Overview)</div>
+
+        <!-- Client info -->
+        <div style="display:grid; grid-template-columns:1fr{% if client.c2_name %} 1fr{% endif %}; gap:12px; margin-bottom:20px;">
+            <div style="background:var(--green-light); border:1.5px solid #9AE6B4; border-radius:6px; padding:12px 14px;">
+                <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--green);">Client 1</div>
+                <div style="font-weight:700; color:var(--navy); margin-top:2px;">{{ client.c1_name }}</div>
+                <div style="font-size:11px; color:var(--gray-600);">{% if client.c1_dob %}DOB: {{ client.c1_dob }}  •  Age: {{ age1 }}{% endif %}  •  SSN ****{{ client.c1_ssn }}</div>
+            </div>
+            {% if client.c2_name %}
+            <div style="background:var(--blue-light); border:1.5px solid #BEE3F8; border-radius:6px; padding:12px 14px;">
+                <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--blue);">Client 2</div>
+                <div style="font-weight:700; color:var(--navy); margin-top:2px;">{{ client.c2_name }}</div>
+                <div style="font-size:11px; color:var(--gray-600);">{% if client.c2_dob %}DOB: {{ client.c2_dob }}  •  Age: {{ age2 }}{% endif %}  •  SSN ****{{ client.c2_ssn }}</div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Retirement section -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+            <div>
+                <div class="acc-section-title" style="color:var(--green);">Client 1 Retirement</div>
+                {% for acc in ret_c1 %}
+                <div style="background:var(--green-light); border:1px solid #9AE6B4; border-radius:6px; padding:10px 12px; margin-bottom:8px;">
+                    <div style="font-weight:600; font-size:12px; color:var(--navy);">{{ acc.account_name }} {% if acc.last_four %}<span style="color:var(--gray-400)">****{{ acc.last_four }}</span>{% endif %}</div>
+                    <div style="font-size:16px; font-weight:700; color:var(--green); font-family:'DM Mono',monospace;">${{ "{:,.2f}".format(acc.balance) }}</div>
+                    {% if acc.cash_balance > 0 %}<div style="font-size:10px; color:var(--gray-400);">Cash: ${{ "{:,.2f}".format(acc.cash_balance) }}</div>{% endif %}
+                </div>
+                {% endfor %}
+                <div style="background:var(--gray-100); border-radius:6px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:11px; font-weight:700; color:var(--gray-600);">C1 RETIREMENT TOTAL</span>
+                    <span style="font-family:'DM Mono',monospace; font-weight:700; color:var(--navy);">${{ "{:,.2f}".format(totals.c1_retirement) }}</span>
+                </div>
+            </div>
+            <div>
+                <div class="acc-section-title" style="color:var(--blue);">Client 2 Retirement</div>
+                {% for acc in ret_c2 %}
+                <div style="background:var(--blue-light); border:1px solid #BEE3F8; border-radius:6px; padding:10px 12px; margin-bottom:8px;">
+                    <div style="font-weight:600; font-size:12px; color:var(--navy);">{{ acc.account_name }} {% if acc.last_four %}<span style="color:var(--gray-400)">****{{ acc.last_four }}</span>{% endif %}</div>
+                    <div style="font-size:16px; font-weight:700; color:var(--blue); font-family:'DM Mono',monospace;">${{ "{:,.2f}".format(acc.balance) }}</div>
+                    {% if acc.cash_balance > 0 %}<div style="font-size:10px; color:var(--gray-400);">Cash: ${{ "{:,.2f}".format(acc.cash_balance) }}</div>{% endif %}
+                </div>
+                {% endfor %}
+                <div style="background:var(--gray-100); border-radius:6px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:11px; font-weight:700; color:var(--gray-600);">C2 RETIREMENT TOTAL</span>
+                    <span style="font-family:'DM Mono',monospace; font-weight:700; color:var(--navy);">${{ "{:,.2f}".format(totals.c2_retirement) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Non-retirement -->
+        <div class="acc-section-title">Non-Retirement Accounts</div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:10px; margin-bottom:16px;">
+            {% for acc in non_ret %}
+            <div style="background:var(--gray-50); border:1px solid var(--gray-200); border-radius:6px; padding:10px 12px; border-left:4px solid var(--navy);">
+                <div style="font-weight:600; font-size:12px; color:var(--navy);">{{ acc.account_name }} {% if acc.last_four %}<span style="color:var(--gray-400)">****{{ acc.last_four }}</span>{% endif %}</div>
+                <div style="font-size:16px; font-weight:700; color:var(--navy); font-family:'DM Mono',monospace;">${{ "{:,.2f}".format(acc.balance) }}</div>
+                {% if acc.cash_balance > 0 %}<div style="font-size:10px; color:var(--gray-400);">Cash: ${{ "{:,.2f}".format(acc.cash_balance) }}</div>{% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Trust -->
+        {% if trust %}
+        <div class="acc-section-title" style="color:var(--gold);">Trust / Real Estate</div>
+        {% for acc in trust %}
+        <div style="background:var(--gold-light); border:1.5px solid #F6AD55; border-radius:6px; padding:12px 14px; margin-bottom:12px;">
+            <div style="font-weight:600; font-size:13px; color:var(--navy);">{{ acc.account_name }}</div>
+            {% if acc.property_address %}<div style="font-size:11px; color:var(--gray-600); margin-top:2px;">{{ acc.property_address }}</div>{% endif %}
+            <div style="font-size:20px; font-weight:800; color:var(--gold); font-family:'DM Mono',monospace; margin-top:6px;">${{ "{:,.2f}".format(acc.balance) }}</div>
+            <div style="font-size:10px; color:var(--gray-400);">Zillow Zestimate</div>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- Grand Total -->
+        <div style="background:var(--navy); color:white; border-radius:8px; padding:18px 22px; display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:20px; align-items:center; margin-bottom:16px;">
+            <div>
+                <div style="font-size:9px; opacity:.5; text-transform:uppercase; letter-spacing:.06em;">C1 Retirement</div>
+                <div style="font-family:'DM Mono',monospace; font-weight:700;">${{ "{:,.2f}".format(totals.c1_retirement) }}</div>
+            </div>
+            <div>
+                <div style="font-size:9px; opacity:.5; text-transform:uppercase; letter-spacing:.06em;">C2 Retirement</div>
+                <div style="font-family:'DM Mono',monospace; font-weight:700;">${{ "{:,.2f}".format(totals.c2_retirement) }}</div>
+            </div>
+            <div>
+                <div style="font-size:9px; opacity:.5; text-transform:uppercase; letter-spacing:.06em;">Non-Ret + Trust</div>
+                <div style="font-family:'DM Mono',monospace; font-weight:700;">${{ "{:,.2f}".format(totals.non_retirement + totals.trust) }}</div>
+            </div>
+            <div style="text-align:right;">
+                <div style="font-size:10px; opacity:.6; text-transform:uppercase; letter-spacing:.06em;">Grand Total Net Worth</div>
+                <div style="font-size:24px; font-weight:800; font-family:'DM Mono',monospace; color:#6EE7B7;">${{ "{:,.2f}".format(totals.net_worth) }}</div>
+            </div>
+        </div>
+
+        <!-- Liabilities -->
+        {% if liabilities %}
+        <div style="background:var(--red-light); border:1.5px solid #FEB2B2; border-radius:8px; padding:16px 20px; margin-bottom:16px;">
+            <div style="font-size:11px; font-weight:700; color:var(--red); text-transform:uppercase; letter-spacing:.06em; margin-bottom:12px;">Liabilities — Isolated Box (Not Deducted from Net Worth)</div>
+            {% for acc in liabilities %}
+            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #FEB2B2;">
+                <div>
+                    <div style="font-weight:600; font-size:13px;">{{ acc.account_name }}</div>
+                    {% if acc.interest_rate %}<div style="font-size:11px; color:var(--gray-600);">Rate: {{ acc.interest_rate }}</div>{% endif %}
+                </div>
+                <div style="font-family:'DM Mono',monospace; font-weight:700; color:var(--red);">${{ "{:,.2f}".format(acc.balance) }}</div>
+            </div>
+            {% endfor %}
+            <div style="display:flex; justify-content:space-between; margin-top:10px;">
+                <span style="font-weight:700; font-size:13px; color:var(--red);">TOTAL LIABILITIES</span>
+                <span style="font-family:'DM Mono',monospace; font-weight:800; color:var(--red); font-size:16px;">${{ "{:,.2f}".format(totals.liabilities) }}</span>
+            </div>
+        </div>
+        {% endif %}
+
+        <div style="text-align:center;">
+            <a href="/client/{{ client.id }}/pdf/tcc" class="btn btn-primary" target="_blank">⬇ Download TCC PDF</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
